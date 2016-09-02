@@ -1,5 +1,8 @@
 from slackclient import SlackClient
-
+from cashcoach.spending import report
+from cashcoach.providers import bank
+from cashcoach import secrets
+import gsheets
 BOT_NAME = 'jarvis'
 
 token = 'xoxb-68771372545-IrK1bV4NwGVUPeqVrxry49Tm'
@@ -12,8 +15,6 @@ direct_channel = u'D20NK622Z'
 import time
 import sys
 import logging
-
-import spending
 
 
 
@@ -39,21 +40,34 @@ def handle_command(command, channel):
                              text=msg,
                              as_user=True)
 
-    if command.startswith("balance"):
-        response = "Don't have that info."
-        _respond(response)
+    try:
+        if command.startswith("balance"):
+            response = "Don't have that info."
+            _respond(response)
 
-    elif 'sheet' in command:
-        _respond(sheet_link)
-    elif 'update' in command:
-        _respond("Updating spending ...")
-        spending.update_spending()
-        _respond("Sheet updated: %s" % sheet_link)
-    else:
-        response = "Unrecognized command."
-        slack_client.api_call("chat.postMessage", channel=channel,
-                             text=response,
-                             as_user=True)
+        elif 'sheet' in command:
+            _respond(sheet_link)
+        elif 'update' in command:
+            _respond("Updating spending ...")
+            bank.update_spending()
+            _respond("Sheet updated: %s" % sheet_link)
+        elif 'report' in command:
+            _respond("I'm on it!")
+            logger.debug("Fetching spreadsheet")
+            ss = gsheets.get_spreadsheet("Summer 2016 Budget")
+
+            logger.debug("Making report")
+            msgs = report.create_report(ss)
+
+            _respond(msgs['month'])
+
+            _respond(msgs['adjusted'])
+            logger.debug("Sent messages.")
+        else:
+            _respond("Unrecognized command.")
+    except Exception as e:
+        logger.error(e)
+        _respond("Uh-oh... I had an error.")
 
 
 def parse_slack_output(slack_rtm_output):
