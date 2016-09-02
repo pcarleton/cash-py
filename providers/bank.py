@@ -36,7 +36,7 @@ def get_new_spending():
     logging.info("Fetching Taylor...")
     taylor_spending = fetch_transactions(TAYLOR_TOKEN, start_date)
 
-    all_df = pd.concat([paul_spending, taylor_spending]).sort_values(by='date', ascending=False)
+    all_df = pd.concat([paul_spending, taylor_spending]).sort('date', ascending=False)
 
 
     all_df['account'] = all_df._account.apply(lambda account_id: NICKNAMES[account_id])
