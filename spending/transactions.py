@@ -29,6 +29,8 @@ class DateInfo(object):
 
         self.days_this_month = (self.next_month_start - self.month_start).days
         self.days_left_month = (self.next_month_start - self.week_start).days
+        self.days_left_week = (self.week_end - self.date).days
+        self.days_this_week = 7 - self.days_left_week
 
 def adjust(row):
     amount = float(row.amount)
@@ -79,7 +81,8 @@ def get_targets(df, flex, date=None):
     pre_this_week = this_month[this_month.date < dateinfo.week_start].adjusted.sum()
     this_week_this_month =  this_week[(df.date < dateinfo.next_month_start)]
     adjusted_spent = this_week_this_month.adjusted.sum()
-    adjusted_pace = month_target.left / dateinfo.days_left_month
+    # TODO: Adjust pace for month end.
+    adjusted_pace = month_target.left / (dateinfo.days_left_month - dateinfo.days_this_week)
     adjusted_goal = adjusted_pace*dateinfo.week_days_this_month
 
     adjusted_target = Target(adjusted_goal, adjusted_spent, this_week_this_month,
