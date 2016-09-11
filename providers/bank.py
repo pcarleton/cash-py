@@ -11,7 +11,7 @@ Client.config({
 })
 
 
-logger = logging.getLogger("main")
+logger = logging.getLogger("bank")
 
 
 
