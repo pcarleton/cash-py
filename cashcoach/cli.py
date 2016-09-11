@@ -2,7 +2,8 @@ import argparse
 import logging
 import sys
 
-from providers import bank
+from .providers import bank
+from cashcoach.slack import api, bot
 
 logger = logging.getLogger("main")
 
@@ -13,11 +14,9 @@ def update_transactions():
     bank.update_spending()
 
 
-
-
 def main():
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(name)s %(asctime)s - %(levelname)s - %(message)s",
         stream=sys.stdout)
 
@@ -28,6 +27,10 @@ def main():
 
     if args.command == 'update':
         update_transactions()
+        return
+    elif args.command == 'bot':
+        logger.info("Starting bot...")
+        bot.serve()
         return
 
     logger.warning("Unrecognized command %s", args.command)
