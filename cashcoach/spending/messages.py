@@ -6,7 +6,7 @@ templates = {
         "over": "You've over spent by {over:.2f} this month."
     },
     "weekly": {
-        "base":"You've spent {spent:.2f} this week, your goal is {goal:.2f}, so you have {left:.2f}.",
+        "base": "You've spent {spent:.2f} this week, your goal is {goal:.2f}, so you have {left:.2f}.",
         "over": "You've over spent by {over:.2f} this week."
     },
     "adjusted": {
@@ -16,14 +16,14 @@ templates = {
 
     },
     "split": {
-       "month_end": ("A new month is about to start. You have spent {spent:.2f} so far this week. "
+        "month_end": ("A new month is about to start. You have spent {spent:.2f} so far this week. "
                       "You have {left:.2f} to spend before {month_end_weekday}."),
         "month_start": ("A new month just started.  You have spent {spent:.2f} so far this month,"
                         " so you have {left:.2f} to spend the rest of the week.")
     },
     "end": {
-            "good": "Great job! You under spent by {left:.2f} this {unit}!",
-            "bad": "Oops, you over spent by {over:.2f} this {unit}. It's okay though, new {unit}, new chance!"
+        "good": "Great job! You under spent by {left:.2f} this {unit}!",
+        "bad": "Oops, you over spent by {over:.2f} this {unit}. It's okay though, new {unit}, new chance!"
     }
 }
 
@@ -39,6 +39,7 @@ def make_message(target, base, over, **extra):
     msg = " ".join(tmpls).format(**extra)
 
     return msg
+
 
 def make_messages(targets, date=None):
 
@@ -61,7 +62,23 @@ def make_messages(targets, date=None):
 
         msgs['adjusted'] = make_message(target, tmpl, "", **extra_args)
     else:
+        tmpls = templates['adjusted']
         msgs['adjusted'] = make_message(targets['adjusted'], tmpls['base'], tmpls['over'])
 
+    msgs['lastweek'] = end_message(targets['lastweek'], 'week')
+    msgs['lastmonth'] = end_message(targets['lastmonth'], 'month')
 
     return msgs
+
+
+def end_message(target, category):
+    if category in ['adjusted', 'weekly']:
+        unit = "week"
+    else:
+        unit = "month"
+    tmpls = templates["end"]
+
+    if target.over > 0:
+        return make_message(target, "", tmpls['bad'], unit=unit)
+    else:
+        return make_message(target, tmpls['good'], '', unit=unit)
