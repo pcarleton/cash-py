@@ -22,8 +22,8 @@ templates = {
                         " so you have {left:.2f} to spend the rest of the week.")
     },
     "end": {
-        "good": "Great job! You under spent by {left:.2f} this {unit}!",
-        "bad": "Oops, you over spent by {over:.2f} this {unit}. It's okay though, new {unit}, new chance!"
+        "good": "Great job! You under spent by {left:.2f} last {unit}!",
+        "bad": "Oops, you over spent by {over:.2f} last {unit}. It's okay though, new {unit}, new chance!"
     }
 }
 
@@ -71,11 +71,7 @@ def make_messages(targets, date=None):
     return msgs
 
 
-def end_message(target, category):
-    if category in ['adjusted', 'weekly']:
-        unit = "week"
-    else:
-        unit = "month"
+def end_message(target, unit):
     tmpls = templates["end"]
 
     if target.over > 0:
