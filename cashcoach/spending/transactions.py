@@ -56,6 +56,25 @@ def _get_month_target(df, flex, dateinfo):
     return month_target
 
 
+def _get_days_target(df, flex, dateinfo):
+    trans = df[(df.date >= dateinfo.month_start) &
+               (df.date < dateinfo.date)]
+
+    duration = (dateinfo.date - dateinfo.month_start).days
+
+    if duration == 0:
+        goal = 0
+    else:
+        pace = float(flex) / dateinfo.days_this_month
+        goal = duration * pace
+
+    spent = trans.adjusted.sum()
+
+    target = Target(goal, spent, trans, dateinfo.month_start, dateinfo.date)
+
+    return target
+
+
 def _get_week_target(df, flex, dateinfo):
     daily_pace = flex / dateinfo.days_this_month
 
@@ -160,5 +179,15 @@ def summary_data(dateinfo, df, flex):
             short=short, diff=target.difference)
 
         lines.append(line)
+
+    week_start = DateInfo(dateinfo.week_start)
+    month_so_far = _get_days_target(df, flex, week_start)
+
+    duration = (week_start.date - week_start.month_start).days
+
+    lines.append("Total ({days}d): ${spent:.2f} / {goal:.2f} ({diff:+.2f})".format(
+        days=duration,
+        spent=month_so_far.spent, goal=month_so_far.goal, diff=month_so_far.difference
+    ))
 
     return lines

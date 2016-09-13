@@ -91,7 +91,8 @@ class TestTargets(unittest.TestCase):
 
     def test_summary(self):
         expected = ["Wk 1 (4d): $30.00 / 40.00 (+10.00)",
-                    "Wk 2 (7d): $80.00 / 72.69 (-7.31)"]
+                    "Wk 2 (7d): $80.00 / 72.69 (-7.31)",
+                    "Total (11d): $110.00 / 110.00 (+0.00)"]
 
         trans = [
             ('9/2/2016', 30),
