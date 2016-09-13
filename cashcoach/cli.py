@@ -37,6 +37,11 @@ def send_message(frontend, backend, message_name):
     frontend.send_message(all_messages[message_name])
 
 
+def send_summary(frontend, backend):
+    msgs = report.create_summary(backend)
+    frontend.send_message("\n".join(msgs))
+
+
 def main():
     logging.basicConfig(
         level=logging.INFO,
@@ -75,5 +80,7 @@ def main():
         run_bot()
     elif args.command == 'message':
         send_message(frontend, backend, args.message)
+    elif args.command == 'summary':
+        send_summary(frontend, backend)
     else:
         logger.warning("Unrecognized command %s", args.command)
