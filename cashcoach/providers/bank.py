@@ -10,7 +10,7 @@ Client.config({
 })
 
 
-logger = logging.getLogger("bank")
+logger = logging.getLogger(__name__)
 
 def fetch_transactions(token, start_date):
     client = Client(client_id=CLIENT_ID,

@@ -8,7 +8,7 @@ from cashcoach.slack import bot
 from cashcoach.spending import report
 from cashcoach import secrets
 
-logger = logging.getLogger("main")
+logger = logging.getLogger(__name__)
 
 
 def update_transactions(backend):

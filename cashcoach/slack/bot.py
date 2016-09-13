@@ -7,7 +7,7 @@ from cashcoach.providers import bank
 from cashcoach.spending import report
 
 
-logger = logging.getLogger("bot")
+logger = logging.getLogger(__name__)
 
 # TODO: Generate
 sheet_link = u"https://docs.google.com/spreadsheets/d/1s_imsHhZuC-iDX3R0I0s2rN2uFjaWB6UXrenjf7rnVg/edit#gid=0"

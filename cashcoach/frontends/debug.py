@@ -2,7 +2,7 @@ import logging
 
 from . import common
 
-logger = logging.getLogger("frontend")
+logger = logging.getLogger(__name__)
 
 
 class DebugFrontend(common.Frontend):

@@ -4,7 +4,7 @@ import logging
 from cashcoach import secrets
 from . import common
 
-logger = logging.getLogger("sheets")
+logger = logging.getLogger(__name__)
 
 
 def _to_num(val):

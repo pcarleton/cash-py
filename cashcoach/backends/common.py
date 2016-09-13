@@ -3,7 +3,7 @@ import logging
 
 from cashcoach import secrets
 
-logger = logging.getLogger("backend")
+logger = logging.getLogger(__name__)
 
 
 def calculate_flex(monthly_gross, monthly_net, monthly_expenses, savings_rate):
