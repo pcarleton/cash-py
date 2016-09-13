@@ -88,3 +88,30 @@ class TestTargets(unittest.TestCase):
         self.assertEqual(220, target.spent)
         self.assertEqual(90, target.left)
         self.assertEqual(0, target.over)
+
+    def test_summary(self):
+        expected = ["Wk 1 (4d): $30.00 / 40.00 (+10.00)",
+                    "Wk 2 (7d): $80.00 / 72.69 (-7.31)"]
+
+        trans = [
+            ('9/2/2016', 30),
+            ('9/6/2016', 80),
+        ]
+        dateinfo = transactions.DateInfo(datetime.date(2016, 9, 12))
+        flex = 300
+
+        df = _make_transactions(trans)
+
+        lines = transactions.summary_data(dateinfo, df, flex)
+
+        self.assertEqual(expected, lines)
+
+
+class TestDateInfo(unittest.TestCase):
+
+    def test_month_days(self):
+        date = datetime.date(2016, 9, 12)
+        dateinfo = transactions.DateInfo(date)
+
+        self.assertEqual(11, dateinfo.days_before_this_week)
+        self.assertEqual(19, dateinfo.days_after_week_start)

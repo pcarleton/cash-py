@@ -19,20 +19,14 @@ class DateInfo(object):
         self.next_week_start = self.week_start + datetime.timedelta(days=7)
         self.last_week_end = self.week_start - datetime.timedelta(days=1)
 
-        self.month_start = self.week_start.replace(day=1)
+        self.month_start = self.date.replace(day=1)
         self.next_month_start = get_next_month(self.month_start)
 
-        if self.next_week_start > self.next_month_start:
-            self.week_days_next_month = (self.next_week_start - self.next_month_start).days
-        else:
-            self.week_days_next_month = 0
-        self.week_days_this_month = 7 - self.week_days_next_month
+        self.days_before_this_week = max(0, (self.week_start - self.month_start).days)
+        self.days_after_week_start = (self.next_month_start -
+                                      max(self.week_start, self.month_start)).days
 
         self.days_this_month = (self.next_month_start - self.month_start).days
-        self.days_left_month = (self.next_month_start - self.week_start).days
-        self.days_left_week = (self.next_week_start - self.date).days
-        self.days_this_week = 7 - self.days_left_week
-
 
 
 class Target(object):
@@ -77,31 +71,31 @@ def _get_week_target(df, flex, dateinfo):
 
 
 def _get_adjusted_targets(df, flex, dateinfo):
-    pre_this_week = df[(df.date >= dateinfo.month_start) &
-                       (df.date < dateinfo.week_start)].adjusted.sum()
+    this_month = df[(df.date >= dateinfo.month_start) &
+                    (df.date <= dateinfo.date) &
+                    (df.date < dateinfo.next_month_start)]
+    pre_this_week = this_month[(this_month.date < dateinfo.week_start)].adjusted.sum()
 
-    this_week = df[(df.date >= dateinfo.week_start) &
-                   (df.date < dateinfo.next_week_start)]
-    this_week_this_month = this_week[(this_week.date < dateinfo.next_month_start)]
+    period_start = max(dateinfo.week_start, dateinfo.month_start)
+    period_end = min(dateinfo.next_week_start, dateinfo.next_month_start)
+
+    period_length = (period_end - period_start).days
+
+    this_week_this_month = this_month[(this_month.date >= period_start) &
+                                      (this_month.date < period_end)]
 
     this_week_month_spent = this_week_this_month.adjusted.sum()
 
     left_this_month = flex - pre_this_week
-    adjusted_pace = left_this_month / dateinfo.days_left_month
-    adjusted_goal = adjusted_pace*dateinfo.week_days_this_month
 
-    month_end_target = Target(adjusted_goal, this_week_month_spent, this_week_this_month,
-                              dateinfo.week_start, min(dateinfo.next_week_start, dateinfo.next_month_start))
+    # Days left un-accounted
+    adjusted_pace = float(left_this_month) / dateinfo.days_after_week_start
+    adjusted_goal = adjusted_pace*period_length
 
-    daily_pace = flex / dateinfo.days_this_month
-    split_week_goal = daily_pace * dateinfo.week_days_next_month
-    split_week_trans = this_week[(this_week.date >= dateinfo.next_month_start)]
-    split_week_spent = split_week_trans.adjusted.sum()
-    month_start_target = Target(split_week_goal, split_week_spent, split_week_trans,
-                                dateinfo.next_month_start, max(dateinfo.next_month_start,
-                                                               dateinfo.next_week_start))
+    target = Target(adjusted_goal, this_week_month_spent, this_week_this_month,
+                    period_start, period_end)
 
-    return month_end_target, month_start_target
+    return target
 
 
 def _get_last_week(df, flex, dateinfo):
@@ -153,28 +147,18 @@ def summary_data(dateinfo, df, flex):
 
     targets = []
     for info in infos:
-        month_end, month_start = _get_adjusted_targets(df, flex, info)
-
-        if _match_cur_month(month_end.end):
-            targets.append(month_end)
-        else:
-            targets.append(month_start)
+        targets.append(_get_adjusted_targets(df, flex, info))
 
     sorted_targets = sorted(targets, key=lambda t: t.start)
     lines = []
     for i, target in enumerate(sorted_targets, 1):
-        num_days = (target.end - target.start).days + 1
-        if num_days < 7:
-            short = "(%d days)" % num_days
-        else:
-            short = ""
+        num_days = (target.end - target.start).days
+        short = "(%dd)" % num_days
 
-        line = "Week {i}{short}: ${spent:.2f} / {goal:.2f} ({diff:+.2f})".format(
-            i=i, spent=target.spent, goal=target.goal, short=short, diff=target.difference)
+        line = "Wk {i} {short}: ${spent:.2f} / {goal:.2f} ({diff:+.2f})".format(
+            i=i, spent=target.spent, goal=target.goal,
+            short=short, diff=target.difference)
 
         lines.append(line)
 
     return lines
-
-
-
