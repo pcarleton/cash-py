@@ -130,7 +130,7 @@ def get_targets(df, flex, date=None):
         "month": _get_month_target(df, flex, dateinfo),
         "adjusted": month_end,
         "weekly": _get_week_target(df, flex, dateinfo),
-        "split": month_end,
+        "split": month_start,
         "lastweek": _get_last_week(df, flex, dateinfo),
         "lastmonth": _get_last_month(df, flex, dateinfo)
     }
