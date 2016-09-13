@@ -38,8 +38,8 @@ class TestTargets(unittest.TestCase):
 
     def test_adjusted(self):
         trans = [
-            ('8/2/2016', 105),
-            ('8/8/2016', 105),
+            ('8/2/2016', 112.5),
+            ('8/8/2016', 112.5),
             ('8/15/2016', 10)
         ]
 
@@ -47,7 +47,7 @@ class TestTargets(unittest.TestCase):
         flex = 310
         df = _make_transactions(trans)
 
-        target, _ = transactions._get_adjusted_targets(df, flex, dateinfo)
+        target = transactions._get_adjusted_targets(df, flex, dateinfo)
 
         self.assertEqual(35, target.goal)
         self.assertEqual(10, target.spent)

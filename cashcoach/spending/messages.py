@@ -15,12 +15,6 @@ templates = {
         "over": "You've over spent by {over:.2f} this week."
 
     },
-    "split": {
-        "month_end": ("A new month is about to start. You have spent {spent:.2f} so far this week. "
-                      "You have {left:.2f} to spend before {month_end_weekday}."),
-        "month_start": ("A new month just started.  You have spent {spent:.2f} so far this month,"
-                        " so you have {left:.2f} to spend the rest of the week.")
-    },
     "end": {
         "good": "Great job! You under spent by {left:.2f} last {unit}!",
         "bad": "Oops, you over spent by {over:.2f} last {unit}. It's okay though, new {unit}, new chance!"
@@ -41,29 +35,12 @@ def make_message(target, base, over, **extra):
     return msg
 
 
-def make_messages(targets, date=None):
+def make_messages(targets):
 
     msgs = {}
-    for cat in ['month', 'weekly']:
+    for cat in ['month', 'weekly', 'adjusted']:
         tmpls = templates[cat]
         msgs[cat] = make_message(targets[cat], tmpls['base'], tmpls['over'])
-
-    split = targets['split']
-    if split.goal > 0:
-        if date is None:
-            date = datetime.date.today()
-        extra_args = {"month_end_weekday": weekdays[split.start.weekday()]}
-        if date >= split.start:
-            tmpl = templates['split']['month_start']
-            target = split
-        else:
-            tmpl = templates['split']['month_end']
-            target = targets['adjusted']
-
-        msgs['adjusted'] = make_message(target, tmpl, "", **extra_args)
-    else:
-        tmpls = templates['adjusted']
-        msgs['adjusted'] = make_message(targets['adjusted'], tmpls['base'], tmpls['over'])
 
     msgs['lastweek'] = end_message(targets['lastweek'], 'week')
     msgs['lastmonth'] = end_message(targets['lastmonth'], 'month')

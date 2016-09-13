@@ -120,11 +120,7 @@ def _get_adjusted_targets(df, flex, dateinfo):
 def _get_last_week(df, flex, dateinfo):
     old_dateinfo = DateInfo(dateinfo.last_week_end)
 
-    month_end, month_start = _get_adjusted_targets(df, flex, old_dateinfo)
-
-    if month_start.goal > 0:
-        return month_start
-
+    month_end = _get_adjusted_targets(df, flex, old_dateinfo)
     return month_end
 
 
@@ -140,12 +136,10 @@ def _get_last_month(df, flex, dateinfo):
 def get_targets(df, flex, date=None):
     dateinfo = DateInfo(date)
 
-    month_end, month_start = _get_adjusted_targets(df, flex, dateinfo)
     return {
         "month": _get_month_target(df, flex, dateinfo),
-        "adjusted": month_end,
+        "adjusted":  _get_adjusted_targets(df, flex, dateinfo),
         "weekly": _get_week_target(df, flex, dateinfo),
-        "split": month_start,
         "lastweek": _get_last_week(df, flex, dateinfo),
         "lastmonth": _get_last_month(df, flex, dateinfo)
     }
