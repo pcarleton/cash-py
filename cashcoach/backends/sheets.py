@@ -1,6 +1,5 @@
 import gsheets
 import logging
-import pandas as pd
 
 from cashcoach import secrets
 from . import common
@@ -10,6 +9,16 @@ logger = logging.getLogger("sheets")
 
 def _to_num(val):
     return float(val.replace("$", "").replace(",", ""))
+
+
+DATE_FORMAT = "%m/%d/%Y"
+
+
+def _fmt_date(date):
+    if isinstance(date, basestring):
+        return date
+
+    return date.strftime(DATE_FORMAT)
 
 
 class SheetsBackend(common.Backend):
@@ -36,5 +45,9 @@ class SheetsBackend(common.Backend):
 
     def save_transactions(self, spend_df):
         logging.info("Saving spreadsheet...")
-        self._ss.save_sheet(self.TRANSACTIONS_SHEET, spend_df)
+
+        # Format dates as strings
+        reformat = spend_df[:]
+        reformat['date'] = reformat['date'].apply(_fmt_date)
+        self._ss.save_sheet(self.TRANSACTIONS_SHEET, reformat)
         logging.info("Success!")
