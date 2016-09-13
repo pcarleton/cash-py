@@ -80,7 +80,7 @@ def _get_adjusted_targets(df, flex, dateinfo):
 
     this_week = df[(df.date >= dateinfo.week_start) &
                    (df.date < dateinfo.week_end)]
-    this_week_this_month = this_week[(df.date < dateinfo.next_month_start)]
+    this_week_this_month = this_week[(this_week.date < dateinfo.next_month_start)]
 
     this_week_month_spent = this_week_this_month.adjusted.sum()
 
@@ -93,7 +93,7 @@ def _get_adjusted_targets(df, flex, dateinfo):
 
     daily_pace = flex / dateinfo.days_this_month
     split_week_goal = daily_pace * dateinfo.week_days_next_month
-    split_week_trans = this_week[(df.date >= dateinfo.next_month_start)]
+    split_week_trans = this_week[(this_week.date >= dateinfo.next_month_start)]
     split_week_spent = split_week_trans.adjusted.sum()
     month_start_target = Target(split_week_goal, split_week_spent, split_week_trans,
                                 dateinfo.next_month_start, max(dateinfo.next_month_start, dateinfo.week_end))

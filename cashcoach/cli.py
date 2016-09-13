@@ -3,8 +3,8 @@ import logging
 import sys
 
 from cashcoach.providers import bank
-from cashcoach import backends
-from cashcoach.slack import api, bot
+from cashcoach import backends, frontends
+from cashcoach.slack import bot
 from cashcoach.spending import report
 from cashcoach import secrets
 
@@ -25,19 +25,16 @@ def run_bot():
     bot.serve()
 
 
-def send_message(backend, message_name, silent=False):
+def send_message(frontend, backend, message_name):
     logger.info("Getting message content...")
     all_messages = report.create_report(backend)
 
     if message_name not in all_messages:
         logger.error("Invalid message name %s", message_name)
-        api.send_message("I couldn't find a message for %s" % message_name)
+        frontend.send_message("I couldn't find a message for %s" % message_name)
         return
 
-    if not silent:
-        api.send_message(all_messages[message_name])
-    else:
-        logger.info(all_messages[message_name])
+    frontend.send_message(all_messages[message_name])
 
 
 def main():
@@ -49,7 +46,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("command")
     parser.add_argument('-m', "--message", type=unicode)
-    parser.add_argument("--silent", action='store_true')
+    parser.add_argument("--frontend", type=unicode, default="slack")
     parser.add_argument("--backend", type=unicode)
     parser.add_argument("--flex", type=float)
 
@@ -67,11 +64,16 @@ def main():
     else:
         backend = backends.SheetsBackend(secrets.SPREADSHEET_NAME)
 
+    if args.frontend == "slack":
+        frontend = frontends.SlackFrontend(secrets.DIRECT_CHANNEL)
+    else:
+        frontend = frontends.DebugFrontend()
+
     if args.command == 'update':
         update_transactions(backend)
     elif args.command == 'bot':
         run_bot()
     elif args.command == 'message':
-        send_message(backend, args.message, args.silent)
+        send_message(frontend, backend, args.message)
     else:
         logger.warning("Unrecognized command %s", args.command)
