@@ -19,16 +19,17 @@ def _adjust(row):
     mult = secrets.ADJUSTMENTS.get(row.account, 1)
     return amount*mult
 
+
 def _fix_exclude(val):
     if val == '' or pd.isnull(val):
         return False
     return val == True or val == 'TRUE'
 
+
 def prepare_transactions(df):
     df.date = pd.to_datetime(df.date)
     df['exclude'] = df.exclude.apply(_fix_exclude)
     df['adjusted'] = df.apply(_adjust, axis=1)
-
 
     return df
 
@@ -59,3 +60,14 @@ class Backend(object):
         spend_df = dedup_df[self.SPENDING_COLS].merge(excluded, on='_id', how='left')
 
         self.save_transactions(spend_df)
+
+    def exclude_transactions(self, transaction_ids):
+        logger.info("Excluding transactions: %s", " ".join(transaction_ids))
+        transactions = self.get_transactions()
+
+        def _add_exclude(row):
+            return row['exclude'] or row['_id'] in transaction_ids
+
+        transactions['exclude'] = transactions.apply(_add_exclude, axis=1)
+
+        self.save_transactions(transactions)
