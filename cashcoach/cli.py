@@ -4,7 +4,8 @@ import sys
 
 from cashcoach.providers import bank
 from cashcoach import backends, frontends
-from cashcoach.slack import bot
+# from cashcoach.slack import bot
+from cashcoach import bot
 from cashcoach.spending import report
 from cashcoach import secrets
 
@@ -20,9 +21,9 @@ def update_transactions(backend):
     backend.update_transactions(latest_transactions)
 
 
-def run_bot():
-    logger.info("Starting bot...")
-    bot.serve()
+# def run_bot():
+#     logger.info("Starting bot...")
+#     bot.serve()
 
 
 def send_message(frontend, backend, message_name):
@@ -35,6 +36,11 @@ def send_message(frontend, backend, message_name):
         return
 
     frontend.send_message(all_messages[message_name])
+
+
+def send_last_n(frontend, backend):
+    msg = report.last_n(backend)
+    frontend.send_message(msg)
 
 
 def send_summary(frontend, backend):
@@ -77,7 +83,8 @@ def main():
     if args.command == 'update':
         update_transactions(backend)
     elif args.command == 'bot':
-        run_bot()
+        mybot = bot.Bot(frontend, backend)
+        mybot.start()
     elif args.command == 'message':
         send_message(frontend, backend, args.message)
     elif args.command == 'summary':
