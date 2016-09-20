@@ -3,6 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class Bot(object):
 
     def __init__(self, frontend, backend):
