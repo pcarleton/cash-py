@@ -53,7 +53,19 @@ class Bot(object):
             if self.state['action'](message):
                 return True
 
-        if 'last' in message:
+        messages = ['month', 'weekly', 'adjusted',
+                    'lastweek', 'lastmonth']
+
+        target_m = next((m for m in messages if m in message),
+                        None)
+
+        if target_m:
+            all_messages = report.create_report(self.backend)
+            response = all_messages[target_m]
+        elif 'summary' in message:
+            msgs = report.create_summary(self.backend)
+            response = "\n".join(msgs)
+        elif 'last' in message:
             response, context = report.last_n(self.backend, page=0)
             self.state = {"action": self.last_n, "context": context, "page": 0}
         else:
