@@ -2,28 +2,12 @@ import argparse
 import logging
 import sys
 
-from cashcoach.providers import bank
 from cashcoach import backends, frontends
-# from cashcoach.slack import bot
 from cashcoach import bot
 from cashcoach.spending import report
 from cashcoach import secrets
 
 logger = logging.getLogger(__name__)
-
-
-def update_transactions(backend):
-    """Fetch the latest transactions and store them"""
-    logger.info("Pulling latest transactions.")
-    latest_transactions = bank.get_new_spending()
-
-    logger.info("Saving latest transactions.")
-    backend.update_transactions(latest_transactions)
-
-
-# def run_bot():
-#     logger.info("Starting bot...")
-#     bot.serve()
 
 
 def send_message(frontend, backend, message_name):
@@ -36,16 +20,6 @@ def send_message(frontend, backend, message_name):
         return
 
     frontend.send_message(all_messages[message_name])
-
-
-def send_last_n(frontend, backend):
-    msg = report.last_n(backend)
-    frontend.send_message(msg)
-
-
-def send_summary(frontend, backend):
-    msgs = report.create_summary(backend)
-    frontend.send_message("\n".join(msgs))
 
 
 def main():
@@ -80,14 +54,13 @@ def main():
     else:
         frontend = frontends.DebugFrontend()
 
-    if args.command == 'update':
-        update_transactions(backend)
-    elif args.command == 'bot':
-        mybot = bot.Bot(frontend, backend)
-        mybot.start()
-    elif args.command == 'message':
-        send_message(frontend, backend, args.message)
-    elif args.command == 'summary':
-        send_summary(frontend, backend)
-    else:
+    if args.command != 'bot':
         logger.warning("Unrecognized command %s", args.command)
+        return
+
+    mybot = bot.Bot(frontend, backend)
+    if args.message:
+        mybot.handle_message(args.message)
+        return
+
+    mybot.start()

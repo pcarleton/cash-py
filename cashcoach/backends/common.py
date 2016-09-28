@@ -47,6 +47,9 @@ class Backend(object):
     def get_flex(self):
         raise NotImplementedError()
 
+    def get_link(self):
+        return "No link :("
+
     def update_transactions(self, new_transactions):
         old_df = self.get_transactions()
         new_df = new_transactions[self.SPENDING_COLS]

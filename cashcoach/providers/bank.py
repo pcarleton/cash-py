@@ -3,7 +3,7 @@ import pandas as pd
 from plaid import Client
 import logging
 from cashcoach.secrets import CLIENT_ID, CLIENT_SECRET, PAUL_TOKEN, TAYLOR_TOKEN, NICKNAMES
-
+from cashcoach import exceptions
 
 Client.config({
     'url': 'https://tartan.plaid.com'
@@ -18,6 +18,12 @@ def fetch_transactions(token, start_date):
                     access_token=token)
 
     response = client.connect_get(opts={'gte': start_date})
+
+    if response.status_code != 200:
+        logger.error("Got status %d from server: %s", response.status_code,
+                     response.text)
+        raise exceptions.ProviderFetchError()
+
     trans = response.json()
     df = pd.DataFrame(trans['transactions'])
 

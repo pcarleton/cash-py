@@ -51,3 +51,6 @@ class SheetsBackend(common.Backend):
         reformat['date'] = reformat['date'].apply(_fmt_date)
         self._ss.save_sheet(self.TRANSACTIONS_SHEET, reformat)
         logging.info("Success!")
+
+    def get_link(self):
+        return self._ss.url

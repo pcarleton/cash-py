@@ -1,4 +1,6 @@
+from cashcoach import exceptions
 from cashcoach.spending import report
+from cashcoach.providers import bank
 import logging
 
 logger = logging.getLogger(__name__)
@@ -60,8 +62,24 @@ class Bot(object):
                         None)
 
         if target_m:
+            self.frontend.send_message("I'm on it!")
             all_messages = report.create_report(self.backend)
             response = all_messages[target_m]
+        elif 'sheet' in message:
+            response = self.backend.get_link()
+        elif 'update' in message:
+            self.frontend.send_message("Updating spending...")
+
+            # TODO: Catch errors on all messages
+            try:
+                logger.info("Pulling latest transactions.")
+                latest_transactions = bank.get_new_spending()
+
+                logger.info("Saving latest transactions.")
+                self.backend.update_transactions(latest_transactions)
+                response = "Sheet updated: %s" % self.backend.get_link()
+            except exceptions.Error as e:
+                response = "Uh oh... got an error %s" % e
         elif 'summary' in message:
             msgs = report.create_summary(self.backend)
             response = "\n".join(msgs)
