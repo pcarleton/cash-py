@@ -1,4 +1,3 @@
-import gsheets
 import logging
 
 from cashcoach import secrets
@@ -13,6 +12,16 @@ def _to_num(val):
 
 DATE_FORMAT = "%m/%d/%Y"
 
+def get_spreadsheet(spreadsheet_name):
+    return Spreadsheet()
+
+class Spreadsheet(object):
+
+    def get_sheet(self, sheet_name):
+        return None
+
+    def save_sheet(self, sheet_name, data_frame):
+        pass
 
 def _fmt_date(date):
     if isinstance(date, basestring):
