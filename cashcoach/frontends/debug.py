@@ -12,5 +12,5 @@ class DebugFrontend(common.Frontend):
 
     def serve(self, callback):
         while True:
-            message = raw_input("#>")
+            message = input("#>")
             callback(message)

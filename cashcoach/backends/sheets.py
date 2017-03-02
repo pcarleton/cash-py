@@ -14,7 +14,7 @@ def _to_num(val):
 DATE_FORMAT = "%m/%d/%Y"
 
 def _fmt_date(date):
-    if isinstance(date, basestring):
+    if isinstance(date, str):
         return date
 
     return date.strftime(DATE_FORMAT)
@@ -47,7 +47,7 @@ class SheetsBackend(common.Backend):
         logging.info("Saving spreadsheet...")
 
         # Format dates as strings
-        reformat = spend_df[:]
+        reformat = spend_df[:].fillna('')
         reformat['date'] = reformat['date'].apply(_fmt_date)
         self._ss.save_sheet(self.TRANSACTIONS_SHEET, reformat)
         logging.info("Success!")

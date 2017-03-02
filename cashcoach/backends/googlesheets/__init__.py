@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -11,6 +12,8 @@ SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.co
 DISCOVERY_URL = 'https://sheets.googleapis.com/$discovery/rest?version=v4'
 
 ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+SPREADSHEET_LINK_TMPL = "https://docs.google.com/spreadsheets/d/%s/edit"
 
 def get_arange_col(col_index):
     if col_index >= len(ALPHABET):
@@ -30,6 +33,18 @@ def get_sheets_service(creds_file_name):
     return service
 
 
+def clean_value(v):
+    if pd.isnull(v):
+        return ''
+
+    if isinstance(v, np.bool_):
+        return bool(v)
+
+    return v
+
+def clean_values(vs):
+    return [clean_value(v) for v in vs]
+
 
 class Spreadsheet(object):
     
@@ -44,6 +59,10 @@ class Spreadsheet(object):
         ss_props = service.spreadsheets().get(spreadsheetId=spreadsheet_id).execute()
         
         return Spreadsheet(ss_props, service)
+
+    @property
+    def url(self):
+        return SPREADSHEET_LINK_TMPL % self.properties['spreadsheetId']
     
     def get_sheet(self, sheet_name):
         sheets_by_title = {s['properties']['title']: s for s in self.properties['sheets']}
@@ -84,9 +103,7 @@ class Spreadsheet(object):
 
         col_names = list(df.columns)
         values = [col_names] + [r[1:] for r in df.itertuples()]
-        body = {"values": values}
+        body = {"values": [clean_values(vs) for vs in values]}
         
-        print(body)
-
         return self.service.spreadsheets().values().update(
             spreadsheetId=ss_id,range=arange, body=body, valueInputOption='USER_ENTERED').execute()

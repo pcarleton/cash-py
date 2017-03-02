@@ -31,8 +31,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("command")
     parser.add_argument('-m', "--message", type=str)
-    parser.add_argument("--frontend", type=str, default="slack")
-    parser.add_argument("--backend", type=str )
+    parser.add_argument("--frontend", type=str, default="slack", choices=["slack", "commandline"])
+    parser.add_argument("--backend", type=str)
+
     parser.add_argument("--flex", type=float)
 
     args = parser.parse_args()
