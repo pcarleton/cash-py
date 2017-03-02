@@ -2,6 +2,7 @@ import logging
 
 from cashcoach import secrets
 from . import common
+from . import googlesheets
 
 logger = logging.getLogger(__name__)
 
@@ -11,17 +12,6 @@ def _to_num(val):
 
 
 DATE_FORMAT = "%m/%d/%Y"
-
-def get_spreadsheet(spreadsheet_name):
-    return Spreadsheet()
-
-class Spreadsheet(object):
-
-    def get_sheet(self, sheet_name):
-        return None
-
-    def save_sheet(self, sheet_name, data_frame):
-        pass
 
 def _fmt_date(date):
     if isinstance(date, basestring):
@@ -33,8 +23,9 @@ def _fmt_date(date):
 class SheetsBackend(common.Backend):
     TRANSACTIONS_SHEET = "all-together"
 
-    def __init__(self, spreadsheet_name):
-        self._ss = gsheets.get_spreadsheet(spreadsheet_name)
+    def __init__(self, spreadsheet_id, creds_file_name):
+        self._ss = googlesheets.Spreadsheet.get(
+                spreadsheet_id, creds_file_name=creds_file_name)
 
     def _get_monthly_expenses(self):
         expenses = self._ss.get_sheet("Expenses")

@@ -30,15 +30,15 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("command")
-    parser.add_argument('-m', "--message", type=unicode)
-    parser.add_argument("--frontend", type=unicode, default="slack")
-    parser.add_argument("--backend", type=unicode)
+    parser.add_argument('-m', "--message", type=str)
+    parser.add_argument("--frontend", type=str, default="slack")
+    parser.add_argument("--backend", type=str )
     parser.add_argument("--flex", type=float)
 
     args = parser.parse_args()
 
     if args.command == 'dump':
-        sheets = backends.SheetsBackend(secrets.SPREADSHEET_NAME)
+        sheets = backends.SheetsBackend(secrets.SPREADSHEET_ID, secrets.CREDS_FILE_NAME)
         csv = backends.CsvBackend(args.backend, 0)
 
         csv.save_transactions(sheets.get_transactions())
@@ -47,7 +47,7 @@ def main():
     if args.backend and 'csv' in args.backend:
         backend = backends.CsvBackend(args.backend, args.flex)
     else:
-        backend = backends.SheetsBackend(secrets.SPREADSHEET_NAME)
+        backend = backends.SheetsBackend(secrets.SPREADSHEET_ID, secrets.CREDS_FILE_NAME)
 
     if args.frontend == "slack":
         frontend = frontends.SlackFrontend(secrets.DIRECT_CHANNEL)
